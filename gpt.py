@@ -3,7 +3,6 @@ from transformers import pipeline, AutoModelForSequenceClassification, AutoToken
 import numpy as np
 from typing import List, Dict
 
-# Load Spacy model for NER
 nlp = spacy.load("en_core_web_sm")
 
 # Load Hugging Face pipeline for sentiment analysis
