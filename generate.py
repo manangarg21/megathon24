@@ -1,87 +1,66 @@
 import pandas as pd
-import numpy as np
-from transformers import pipeline
-from datetime import timedelta
-import random
+import os
 
+# Directory where downloaded datasets are stored
+data_dir = "./mental_health_datasets"
+os.makedirs(data_dir, exist_ok=True)
 
-# Initialize sentiment analysis pipeline
-sentiment_analyzer = pipeline("sentiment-analysis")
-classifier = pipeline(
-    "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english",
-    device=0  # Change to `device=0` for GPU or `device=-1` for CPU
-)
-# Set up synthetic data columns
-data_columns = ["day", "text", "polarity", "concerns", "category", "intensity_score", "timeline_shift"]
+# Define filenames for each dataset (assuming you've saved them with these names)
+file_paths = {
+    "sentiment140": f"{data_dir}/sentiment140.csv",
+    "go_emotions": f"{data_dir}/go_emotions.csv",
+    "smhd": f"{data_dir}/smhd.csv"
+}
 
-# Helper function for intensity scoring
-INTENSITY_WORDS = {"slightly": 3, "somewhat": 5, "very": 7, "extremely": 10}
-def get_intensity_score(text: str) -> int:
-    for word, score in INTENSITY_WORDS.items():
-        if word in text.lower():
-            return score
-    return random.randint(1, 10)  # Random score for neutral cases
+# Load datasets
+sentiment140_df = pd.read_csv(file_paths["sentiment140"], encoding='ISO-8859-1')  # Example encoding
+go_emotions_df = pd.read_csv(file_paths["go_emotions"])
+smhd_df = pd.read_csv(file_paths["smhd"])
 
-# Helper function for sentiment analysis
-def get_sentiment(text: str) -> str:
-    result = sentiment_analyzer(text)[0]
-    return result['label'], result['score']
+# Preprocessing datasets
+# Map each dataset's columns to a common schema
+def preprocess_sentiment140(df):
+    df = df.rename(columns={
+        "text": "Text",
+        "target": "Polarity"  # Map to -1, 0, 1 or "negative", "neutral", "positive"
+    })
+    df["ids"] = None  # No category labels here
+    df["date"] = None
+    df["flag"] = None
+    df["user"]=None
+    return df[["Text", "Polarity", "ids", "date", "flag", "user"]]
 
-# Load datasets (assuming they are in CSV format; replace with paths to your datasets)
-# Replace with paths if you have saved the datasets locally.
-reddit_mental_health = pd.DataFrame({
-    "text": ["I'm feeling very anxious today", "I can't sleep well and feel very low", "I'm extremely stressed"],
-    "category": ["Anxiety", "Insomnia", "Stress"]
-})
-goemotions = pd.DataFrame({
-    "text": ["Feeling so sad today", "I'm filled with joy", "I'm terrified of tomorrow"],
-    "category": ["Sadness", "Joy", "Fear"]
-})
-semeval = pd.DataFrame({
-    "text": ["Feeling a bit better", "I'm feeling worse every day", "I feel happy today"],
-    "intensity_score": [4, 8, 3]
-})
+def preprocess_go_emotions(df):
+    df = df.rename(columns={
+        "comment": "Text",
+        "emotion": "Polarity"  # Needs to be mapped to negative/positive as needed
+    })
+    df["Category"] = None
+    df["Intensity Score"] = None
+    df["Timeline"] = None
+    return df[["Text", "Polarity", "Category", "Intensity Score", "Timeline"]]
 
-# Combine datasets
-datasets = [reddit_mental_health, goemotions, semeval]
-combined_data = pd.concat(datasets, ignore_index=True)
+def preprocess_smhd(df):
+    df = df.rename(columns={
+        "text": "Text",
+        "mental_health_issue": "Category"  # Assuming it has a mental health category column
+    })
+    df["Polarity"] = None  # Define based on available data or set to neutral
+    df["Intensity Score"] = None
+    df["Timeline"] = None
+    return df[["Text", "Polarity", "Category", "Intensity Score", "Timeline"]]
 
-# Generate synthetic data
-synthetic_data = []
+# Apply preprocessing
+sentiment140_df = preprocess_sentiment140(sentiment140_df)
+go_emotions_df = preprocess_go_emotions(go_emotions_df)
+smhd_df = preprocess_smhd(smhd_df)
 
-start_date = pd.Timestamp("2024-01-01")
-for i, row in combined_data.iterrows():
-    day_offset = random.randint(0, 30)  # Generate entries over a 30-day period
-    text = row['text']
-    category = row.get('category', 'General')
-    
-    # Polarity and sentiment analysis
-    polarity, polarity_score = get_sentiment(text)
-    
-    # Generate synthetic concerns and intensity score
-    concerns = [text]
-    intensity_score = row.get("intensity_score", get_intensity_score(text))
-    
-    # Simulate timeline shifts by assigning random changes in polarity
-    timeline_shift = random.choice(["No change", "Improvement", "Deterioration"])
-    
-    # Build synthetic entry
-    synthetic_entry = {
-        "day": start_date + timedelta(days=day_offset),
-        "text": text,
-        "polarity": {"label": polarity, "score": polarity_score},
-        "concerns": concerns,
-        "category": category,
-        "intensity_score": intensity_score,
-        "timeline_shift": timeline_shift
-    }
-    synthetic_data.append(synthetic_entry)
+# Concatenate all datasets
+merged_df = pd.concat([sentiment140_df, go_emotions_df, smhd_df], ignore_index=True)
 
-# Convert to DataFrame
-synthetic_df = pd.DataFrame(synthetic_data, columns=data_columns)
+# Display merged DataFrame sample
+print(merged_df.head())
 
-# Save to CSV for review or future use
-synthetic_df.to_csv("synthetic_mental_health_data.csv", index=False)
-
-print("Generated Synthetic Data:\n", synthetic_df.head())
+# Save combined dataset to CSV
+merged_df.to_csv(f"{data_dir}/combined_mental_health_dataset.csv", index=False)
+print(f"Combined dataset saved to {data_dir}/combined_mental_health_dataset.csv")
