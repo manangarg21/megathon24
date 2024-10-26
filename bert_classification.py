@@ -83,3 +83,43 @@ def evaluate(model, dataloader):
     print(f"Accuracy: {accuracy:.4f}")
 
 evaluate(model, test_dataloader)
+
+import torch.nn.functional as F
+
+# Evaluate with confidence score
+def evaluate_with_confidence(model, dataloader):
+    model.eval()
+    correct = 0
+    results = []
+    with torch.no_grad():
+        for batch in dataloader:
+            input_ids = batch['input_ids']
+            labels = batch['labels']
+            outputs = model(inputs_embeds=input_ids)
+            logits = outputs.logits
+            predictions = torch.argmax(logits, dim=-1)
+            
+            # Calculate softmax for confidence score
+            probabilities = F.softmax(logits, dim=-1)
+            confidence_scores = torch.max(probabilities, dim=-1).values
+            
+            # Scale confidence scores from 1 to 10
+            scaled_confidences = (confidence_scores * 9 + 1).int()
+            
+            # Collect results as tuples of (prediction, confidence)
+            for pred, confidence in zip(predictions, scaled_confidences):
+                results.append((pred.item(), confidence.item()))
+            
+            # Calculate accuracy
+            correct += (predictions == labels).sum().item()
+    
+    accuracy = correct / len(dataloader.dataset)
+    print(f"Accuracy: {accuracy:.4f}")
+    
+    # Print example results
+    print("Sample predictions with confidence scores:")
+    for result in results[:10]:  # Show first 10 results
+        print(f"Class: {result[0]}, Confidence: {result[1]}/10")
+
+evaluate_with_confidence(model, test_dataloader)
+
