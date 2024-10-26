@@ -39,17 +39,20 @@
 // }
 // lib/screens/home_page.dart
 
+// lib/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import '../widgets/question_card.dart';
 import '../services/journal_service.dart';
+import '../models/question.dart'; // Import the Question model
 
 class HomePage extends StatelessWidget {
   final JournalService _journalService = JournalService();
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve daily question from the JournalService
-    final String dailyQuestion = "Today's Question : " + _journalService.getDailyQuestion();
+    // Retrieve the daily question from JournalService
+    final Question dailyQuestion = _journalService.getDailyQuestion(); // Get the Question object
 
     return Scaffold(
       appBar: AppBar(
@@ -66,8 +69,8 @@ class HomePage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             
-            // Displaying the daily question using QuestionCard
-            QuestionCard(question: dailyQuestion),
+            // Pass the entire Question object to QuestionCard
+            QuestionCard(question: dailyQuestion), 
             
             SizedBox(height: 20),
             ElevatedButton(

@@ -1,20 +1,26 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter_application_1/services/database_helper.dart';
+
 import 'screens/home_page.dart';
 import 'screens/new_entry_page.dart';
 import 'screens/view_entries_page.dart';
 
-void main() {
-  // Initialize sqflite_common_ffi if running on desktop platforms
-  if (isDesktopPlatform()) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the database
+  try {
+    await DatabaseHelper.instance.database;
+    print('Database initialized successfully');
+  } catch (e) {
+    print('Error initializing database: $e');
   }
+
   runApp(MyApp());
 }
 
+// Function to determine if the app is running on a desktop platform
 bool isDesktopPlatform() {
   return [
     TargetPlatform.windows,

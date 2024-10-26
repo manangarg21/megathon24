@@ -1,7 +1,6 @@
-// lib/screens/view_entries_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/database_helper.dart'; // Database service instead of JournalService
+import '../services/database_helper.dart';
 import '../models/journal_entry.dart';
 
 class ViewEntriesPage extends StatelessWidget {
@@ -11,7 +10,6 @@ class ViewEntriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Format date as "yyyy-MM-dd" for consistent SQL querying
     final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
 
     return Scaffold(
@@ -19,7 +17,7 @@ class ViewEntriesPage extends StatelessWidget {
         title: Text('Entries for ${DateFormat('MMM d, yyyy').format(selectedDate)}'),
       ),
       body: FutureBuilder<List<JournalEntry>>(
-        future: fetchEntriesForDate(formattedDate),
+        future: fetchEntriesForDate(selectedDate),  // Fetch entries by selectedDate
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -39,7 +37,7 @@ class ViewEntriesPage extends StatelessWidget {
                 title: Text(entry.question),
                 subtitle: Text(entry.response),
                 onTap: () {
-                  // You can navigate to an edit or detail page here if needed
+                  // Navigate to detail or edit page if needed
                 },
               );
             },
@@ -49,11 +47,9 @@ class ViewEntriesPage extends StatelessWidget {
     );
   }
 
-  Future<List<JournalEntry>> fetchEntriesForDate(String formattedDate) async {
+  // Use DatabaseHelper to fetch entries by selected date
+  Future<List<JournalEntry>> fetchEntriesForDate(DateTime date) async {
     final db = DatabaseHelper.instance;
-    final entries = await db.fetchJournalEntries();
-    return entries
-        .where((entry) => DateFormat('yyyy-MM-dd').format(entry.date) == formattedDate)
-        .toList();
+    return await db.fetchJournalEntriesByDate(date);  // Fetch directly using MongoDB query
   }
 }
