@@ -6,7 +6,7 @@ import '../models/journal_entry.dart';
 class JournalEntryCard extends StatelessWidget {
   final JournalEntry entry;
 
-  JournalEntryCard({required this.entry});
+  const JournalEntryCard({super.key, required this.entry});
 
   @override
   Widget build(BuildContext context) {

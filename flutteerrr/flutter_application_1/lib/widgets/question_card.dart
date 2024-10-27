@@ -6,7 +6,7 @@ import '../models/question.dart'; // Ensure you import the Question model
 class QuestionCard extends StatelessWidget {
   final Question question;
 
-  const QuestionCard({Key? key, required this.question}) : super(key: key);
+  const QuestionCard({super.key, required this.question});
 
   @override
   Widget build(BuildContext context) {

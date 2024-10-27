@@ -21,7 +21,7 @@ class _ViewEntriesPageState extends State<ViewEntriesPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    
+
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
@@ -32,7 +32,7 @@ class _ViewEntriesPageState extends State<ViewEntriesPage> {
 
   Future<List<JournalEntry>> _fetchEntriesByDate(DateTime date) async {
     final formattedDate = DateFormat('yyyy-MM-dd').format(date);
-    
+
     try {
       // Fetch entries from backend for the selected date
       return await DatabaseHelper.instance.fetchJournalEntriesByDate(date);

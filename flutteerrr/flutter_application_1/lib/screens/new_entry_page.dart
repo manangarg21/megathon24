@@ -5,13 +5,15 @@ import '../services/database_helper.dart'; // Import the DatabaseHelper
 import '../services/journal_service.dart'; // Import the JournalService
 
 class NewEntryPage extends StatefulWidget {
+  const NewEntryPage({super.key});
+
   @override
   _NewEntryPageState createState() => _NewEntryPageState();
 }
 
 class _NewEntryPageState extends State<NewEntryPage> {
-  var _entryController = TextEditingController();
-  var _responseController = TextEditingController();
+  final _entryController = TextEditingController();
+  final _responseController = TextEditingController();
   // final _journalController= TextEditingController();
   String dailyQuestion = ''; // Placeholder for the daily question
 
@@ -27,20 +29,14 @@ class _NewEntryPageState extends State<NewEntryPage> {
     return question.text; // Return the text of the Question object
   }
 
-  Future<void> _saveEntry() async {
-    if (_responseController == null) {
-        _responseController = TextEditingController(text: " ");
-    }
-    if (_entryController == null) {
-      _entryController = TextEditingController(text: " ");
-    }
+  Future<void> _saveEntry() async {  
       final newEntry = JournalEntry(
       date: DateTime.now(),
       question: dailyQuestion,
       response: _responseController.text,
       journal: _entryController.text,
     );
-    print(newEntry.journal);
+    
     await DatabaseHelper.instance.addJournalEntry(newEntry);
     // Clear the input fields after saving
     _entryController.clear();

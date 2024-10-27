@@ -29,10 +29,10 @@ class DatabaseHelper {
         final data = json.decode(response.body);
         return ObjectId.parse(data['id']);
       } else {
-        throw Exception('Failed to add journal entry');
+        throw Exception(response.body);
       }
     } catch (e) {
-      print('Error adding journal entry: $e');
+      print(e.toString());
       rethrow;
     }
   }
@@ -56,17 +56,21 @@ class DatabaseHelper {
 
   Future<List<JournalEntry>> fetchJournalEntriesByDate(DateTime date) async {
     try {
-      final response = await http.get(Uri.parse(
-          '$API_BASE_URL/journal-entries/date/${date.toIso8601String()}'));
-
+      final response = await http.post(
+        Uri.parse('$API_BASE_URL/journal-entries/date'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(
+          {'dateVal': date.toIso8601String()},
+        ),
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => JournalEntry.fromMap(json)).toList();
       } else {
-        throw Exception('Failed to fetch journal entries by date');
+        throw Exception(response.body);
       }
     } catch (e) {
-      print('Error fetching journal entries by date: $e');
+      print(e.toString());
       rethrow;
     }
   }
