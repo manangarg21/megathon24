@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => HomePage(),
         '/new-entry': (context) => NewEntryPage(),
-        '/view-entries': (context) => ViewEntriesPage(selectedDate: DateTime.now()),
+        '/view-entries': (context) => ViewEntriesPage(), // No selectedDate passed here
       },
     );
   }

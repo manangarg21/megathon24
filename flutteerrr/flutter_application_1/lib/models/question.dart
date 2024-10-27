@@ -12,17 +12,17 @@ class Question {
 
   Map<String, dynamic> toMap() {
     return {
-      if (id != null) '_id': id.toString(),
+      if (id != null) 'id': id.toString(),
       'text': text,
     };
   }
 
   factory Question.fromMap(Map<String, dynamic> map) {
     return Question(
-      id: map['_id'] != null ? 
-          (map['_id'] is String ? 
+      id: map['id'] != null ? 
+          (map['id'] is String ? 
               ObjectId.parse(map['_id']) : 
-              map['_id']) : null,
+              map['id']) : null,
       text: map['text'],
     );
   }

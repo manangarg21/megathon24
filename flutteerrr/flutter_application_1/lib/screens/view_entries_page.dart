@@ -1,55 +1,88 @@
+// lib/screens/view_entries_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/database_helper.dart';
 import '../models/journal_entry.dart';
 
-class ViewEntriesPage extends StatelessWidget {
-  final DateTime selectedDate;
+class ViewEntriesPage extends StatefulWidget {
+  @override
+  _ViewEntriesPageState createState() => _ViewEntriesPageState();
+}
 
-  ViewEntriesPage({required this.selectedDate});
+class _ViewEntriesPageState extends State<ViewEntriesPage> {
+  DateTime? selectedDate;
+  Future<List<JournalEntry>>? _entriesFuture;
+
+  void _pickDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        _entriesFuture = _fetchEntriesByDate(selectedDate!);
+      });
+    }
+  }
+
+  Future<List<JournalEntry>> _fetchEntriesByDate(DateTime date) async {
+    final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    
+    try {
+      // Fetch entries from backend for the selected date
+      return await DatabaseHelper.instance.fetchJournalEntriesByDate(date);
+    } catch (e) {
+      print('Error retrieving entries for $formattedDate: $e');
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Entries for ${DateFormat('MMM d, yyyy').format(selectedDate)}'),
+        title: Text('View Entries'),
       ),
-      body: FutureBuilder<List<JournalEntry>>(
-        future: fetchEntriesForDate(selectedDate),  // Fetch entries by selectedDate
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error loading entries'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No entries for this date'));
-          }
+      body: Center(
+        child: selectedDate == null
+            ? ElevatedButton(
+                onPressed: () => _pickDate(context),
+                child: Text('Select Date to View Entries'),
+              )
+            : FutureBuilder<List<JournalEntry>>(
+                future: _entriesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error loading entries: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text('No entries for this date');
+                  }
 
-          final entries = snapshot.data!;
+                  final entries = snapshot.data!;
 
-          return ListView.builder(
-            itemCount: entries.length,
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              return ListTile(
-                title: Text(entry.question),
-                subtitle: Text(entry.response),
-                onTap: () {
-                  // Navigate to detail or edit page if needed
+                  return ListView.builder(
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) {
+                      final entry = entries[index];
+                      return Card(
+                        margin: EdgeInsets.all(8.0),
+                        child: ListTile(
+                          title: Text(entry.question),
+                          subtitle: Text(entry.response),
+                        ),
+                      );
+                    },
+                  );
                 },
-              );
-            },
-          );
-        },
+              ),
       ),
     );
-  }
-
-  // Use DatabaseHelper to fetch entries by selected date
-  Future<List<JournalEntry>> fetchEntriesForDate(DateTime date) async {
-    final db = DatabaseHelper.instance;
-    return await db.fetchJournalEntriesByDate(date);  // Fetch directly using MongoDB query
   }
 }
