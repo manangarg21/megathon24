@@ -9,7 +9,8 @@ import '../models/question.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
-  static const String API_BASE_URL = 'http://localhost:3000/api';  // Change this for production
+  static const String API_BASE_URL =
+      'http://localhost:3000/api'; // Change this for production
 
   DatabaseHelper._init();
 
@@ -23,7 +24,7 @@ class DatabaseHelper {
         headers: {'Content-Type': 'application/json'},
         body: json.encode(entry.toMap()),
       );
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return ObjectId.parse(data['id']);
@@ -32,14 +33,15 @@ class DatabaseHelper {
       }
     } catch (e) {
       print('Error adding journal entry: $e');
-      throw e;
+      rethrow;
     }
   }
 
   Future<List<JournalEntry>> fetchJournalEntries() async {
     try {
-      final response = await http.get(Uri.parse('$API_BASE_URL/journal-entries'));
-      
+      final response =
+          await http.get(Uri.parse('$API_BASE_URL/journal-entries'));
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => JournalEntry.fromMap(json)).toList();
@@ -48,16 +50,15 @@ class DatabaseHelper {
       }
     } catch (e) {
       print('Error fetching journal entries: $e');
-      throw e;
+      rethrow;
     }
   }
 
   Future<List<JournalEntry>> fetchJournalEntriesByDate(DateTime date) async {
     try {
-      final response = await http.get(
-        Uri.parse('$API_BASE_URL/journal-entries/date/${date.toIso8601String()}')
-      );
-      
+      final response = await http.get(Uri.parse(
+          '$API_BASE_URL/journal-entries/date/${date.toIso8601String()}'));
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => JournalEntry.fromMap(json)).toList();
@@ -66,26 +67,26 @@ class DatabaseHelper {
       }
     } catch (e) {
       print('Error fetching journal entries by date: $e');
-      throw e;
+      rethrow;
     }
   }
 
   Future<void> updateJournalEntry(JournalEntry entry) async {
     try {
       if (entry.id == null) throw Exception('Entry ID is required for update');
-      
+
       final response = await http.put(
         Uri.parse('$API_BASE_URL/journal-entries/${entry.id}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(entry.toMap()),
       );
-      
+
       if (response.statusCode != 200) {
         throw Exception('Failed to update journal entry');
       }
     } catch (e) {
       print('Error updating journal entry: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -94,20 +95,20 @@ class DatabaseHelper {
       final response = await http.delete(
         Uri.parse('$API_BASE_URL/journal-entries/$id'),
       );
-      
+
       if (response.statusCode != 200) {
         throw Exception('Failed to delete journal entry');
       }
     } catch (e) {
       print('Error deleting journal entry: $e');
-      throw e;
+      rethrow;
     }
   }
 
   Future<List<Question>> fetchQuestions() async {
     try {
       final response = await http.get(Uri.parse('$API_BASE_URL/questions'));
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => Question.fromMap(json)).toList();
@@ -116,7 +117,7 @@ class DatabaseHelper {
       }
     } catch (e) {
       print('Error fetching questions: $e');
-      throw e;
+      rethrow;
     }
   }
 }
