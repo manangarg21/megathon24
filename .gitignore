@@ -1,5 +1,6 @@
 wandb
 luke-mental-health-ner-sample
 luke-mental-health-ner-full
-saved_model_luke
 .DS_Store
+node_modules
+saved_model_luke/
