@@ -18,9 +18,8 @@ class DatabaseHelper {
 
   Future<ObjectId> addJournalEntry(JournalEntry entry) async {
     try {
-      print(entry);
       final response = await http.post(
-        Uri.parse('$API_BASE_URL/journal-entries'),
+        Uri.parse('$API_BASE_URL/journal-entries/${entry.userId}'), // Pass userId in the URL
         headers: {'Content-Type': 'application/json'},
         body: json.encode(entry.toMap()),
       );
@@ -36,11 +35,9 @@ class DatabaseHelper {
       rethrow;
     }
   }
-
-  Future<List<JournalEntry>> fetchJournalEntries() async {
+  Future<List<JournalEntry>> fetchJournalEntries(String userId) async {
     try {
-      final response =
-          await http.get(Uri.parse('$API_BASE_URL/journal-entries'));
+      final response = await http.get(Uri.parse('$API_BASE_URL/journal-entries/$userId')); // Pass userId in the URL
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -54,15 +51,14 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<JournalEntry>> fetchJournalEntriesByDate(DateTime date) async {
+  Future<List<JournalEntry>> fetchJournalEntriesByDate(DateTime date, String? userId) async {
     try {
       final response = await http.post(
-        Uri.parse('$API_BASE_URL/journal-entries/date'),
+        Uri.parse('$API_BASE_URL/journal-entries/date/$userId'), // Pass userId in the URL
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(
-          {'dateVal': date.toIso8601String()},
-        ),
+        body: json.encode({'dateVal': date.toIso8601String()}),
       );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => JournalEntry.fromMap(json)).toList();
@@ -75,12 +71,12 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> updateJournalEntry(JournalEntry entry) async {
+  Future<void> updateJournalEntry(JournalEntry entry, String? userId) async {
     try {
       if (entry.id == null) throw Exception('Entry ID is required for update');
 
       final response = await http.put(
-        Uri.parse('$API_BASE_URL/journal-entries/${entry.id}'),
+        Uri.parse('$API_BASE_URL/journal-entries/${entry.id}?userId=$userId'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(entry.toMap()),
       );
@@ -94,10 +90,10 @@ class DatabaseHelper {
     }
   }
 
-  Future<void> deleteJournalEntry(ObjectId id) async {
+  Future<void> deleteJournalEntry(ObjectId id, String? userId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$API_BASE_URL/journal-entries/$id'),
+        Uri.parse('$API_BASE_URL/journal-entries/$id/$userId'),
       );
 
       if (response.statusCode != 200) {
@@ -109,9 +105,9 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<Question>> fetchQuestions() async {
+  Future<List<Question>> fetchQuestions(String? userId) async {
     try {
-      final response = await http.get(Uri.parse('$API_BASE_URL/questions'));
+      final response = await http.get(Uri.parse('$API_BASE_URL/questions/$userId'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -125,4 +121,3 @@ class DatabaseHelper {
     }
   }
 }
-// KX3l8FO3DZVaQzSy

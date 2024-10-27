@@ -3,6 +3,7 @@ import 'package:flutter_application_1/data/questions.dart';
 import '../models/journal_entry.dart';
 import '../services/database_helper.dart'; // Import the DatabaseHelper
 import '../services/journal_service.dart'; // Import the JournalService
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NewEntryPage extends StatefulWidget {
   const NewEntryPage({super.key});
@@ -16,11 +17,18 @@ class _NewEntryPageState extends State<NewEntryPage> {
   final _responseController = TextEditingController();
   // final _journalController= TextEditingController();
   String dailyQuestion = ''; // Placeholder for the daily question
+  String? userId;
 
   @override
   void initState() {
     super.initState();
     dailyQuestion = _getDailyQuestion(); // Set the daily question
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    userId = preferences.getString('id');
   }
 
   String _getDailyQuestion() {
@@ -29,14 +37,15 @@ class _NewEntryPageState extends State<NewEntryPage> {
     return question.text; // Return the text of the Question object
   }
 
-  Future<void> _saveEntry() async {  
-      final newEntry = JournalEntry(
+  Future<void> _saveEntry() async {
+    final newEntry = JournalEntry(
       date: DateTime.now(),
       question: dailyQuestion,
       response: _responseController.text,
       journal: _entryController.text,
+      userId: userId ?? '',
     );
-    
+
     await DatabaseHelper.instance.addJournalEntry(newEntry);
     // Clear the input fields after saving
     _entryController.clear();

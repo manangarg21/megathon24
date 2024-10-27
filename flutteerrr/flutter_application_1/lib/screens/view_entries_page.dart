@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_helper.dart';
 import '../models/journal_entry.dart';
 
@@ -13,6 +14,7 @@ class ViewEntriesPage extends StatefulWidget {
 class _ViewEntriesPageState extends State<ViewEntriesPage> {
   DateTime? selectedDate;
   Future<List<JournalEntry>>? _entriesFuture;
+  String? userId;
 
   void _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -35,7 +37,7 @@ class _ViewEntriesPageState extends State<ViewEntriesPage> {
 
     try {
       // Fetch entries from backend for the selected date
-      return await DatabaseHelper.instance.fetchJournalEntriesByDate(date);
+      return await DatabaseHelper.instance.fetchJournalEntriesByDate(date,userId);
     } catch (e) {
       print('Error retrieving entries for $formattedDate: $e');
       return [];
@@ -43,6 +45,18 @@ class _ViewEntriesPageState extends State<ViewEntriesPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserPreferences(); // Load user preferences on initialization
+  }
+
+  Future<void> _loadUserPreferences() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      userId = preferences.getString('id'); 
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

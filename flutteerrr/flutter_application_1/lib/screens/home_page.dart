@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/question_card.dart';
 import '../services/journal_service.dart';
 import '../models/question.dart'; // Import the Question model
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 class HomePage extends StatelessWidget {
   final JournalService _journalService = JournalService();
@@ -14,6 +15,13 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Daily Journal'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _signOut(context), // Call sign out function
+            tooltip: 'Sign Out',
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -47,5 +55,12 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Function to sign out
+  Future<void> _signOut(BuildContext context) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.remove('id'); // Clear the user ID
+    Navigator.of(context).pushReplacementNamed('/signup'); // Navigate to SignupPage
   }
 }
