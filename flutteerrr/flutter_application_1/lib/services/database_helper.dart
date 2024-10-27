@@ -17,6 +17,7 @@ class DatabaseHelper {
 
   Future<ObjectId> addJournalEntry(JournalEntry entry) async {
     try {
+      print(entry);
       final response = await http.post(
         Uri.parse('$API_BASE_URL/journal-entries'),
         headers: {'Content-Type': 'application/json'},
@@ -25,7 +26,7 @@ class DatabaseHelper {
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return ObjectId.parse(data['_id']);
+        return ObjectId.parse(data['id']);
       } else {
         throw Exception('Failed to add journal entry');
       }
@@ -119,74 +120,4 @@ class DatabaseHelper {
     }
   }
 }
-// import 'package:mongo_dart/mongo_dart.dart';
-// import '../models/journal_entry.dart';
-// import '../models/question.dart';
-
-// class DatabaseHelper {
-//   static final DatabaseHelper instance = DatabaseHelper._init();
-//   static Db? _database;
-  
-//   // Replace with your MongoDB connection string from MongoDB Atlas
-//   static const String MONGO_CONN_URL = 'mongodb+srv://kushagradhingra:BAK7fISZJBBg5wkY@cluster.yrtp0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster';
-//   static const String USER_COLLECTION = '';
-//   static const String QUESTIONS_COLLECTION = 'questions';
-
-//   DatabaseHelper._init();
-
-//   Future<Db> get database async {
-//     if (_database != null) return _database!;
-//     _database = await _initDB();
-//     return _database!;
-//   }
-
-//   Future<Db> _initDB() async {
-//     final db = await Db.create(MONGO_CONN_URL);
-//     await db.open();
-//     return db;
-//   }
-
-//   // Add JournalEntry to the database
-//   Future<ObjectId> addJournalEntry(JournalEntry entry) async {
-//     final db = await database;
-//     final collection = db.collection(USER_COLLECTION);
-    
-//     final result = await collection.insertOne(entry.toMap());
-//     return result.id;
-//   }
-
-//   // Add Question to the database
-//   Future<ObjectId> addQuestion(Question question) async {
-//     final db = await database;
-//     final collection = db.collection(QUESTIONS_COLLECTION);
-    
-//     final result = await collection.insertOne(question.toMap());
-//     return result.id;
-//   }
-
-//   // Fetch all JournalEntries from the database
-//   Future<List<JournalEntry>> fetchJournalEntries() async {
-//     final db = await database;
-//     final collection = db.collection(USER_COLLECTION);
-    
-//     final results = await collection.find().toList();
-//     return results.map((json) => JournalEntry.fromMap(json)).toList();
-//   }
-
-//   // Fetch all Questions from the database
-//   Future<List<Question>> fetchQuestions() async {
-//     final db = await database;
-//     final collection = db.collection(QUESTIONS_COLLECTION);
-    
-//     final results = await collection.find().toList();
-//     return results.map((json) => Question.fromMap(json)).toList();
-//   }
-
-//   // Close the database connection
-//   Future close() async {
-//     final db = await database;
-//     await db.close();
-//   }
-// }
-
 // KX3l8FO3DZVaQzSy

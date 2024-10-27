@@ -6,12 +6,13 @@ class JournalEntry {
   final DateTime date;
   final String question;
   final String response;
-
+  final String journal;
   JournalEntry({
     this.id,
     required this.date,
     required this.question,
     required this.response,
+    required this.journal,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +21,7 @@ class JournalEntry {
       'date': date.toIso8601String(),
       'question': question,
       'response': response,
+      'journal' : journal,
     };
   }
 
@@ -32,6 +34,7 @@ class JournalEntry {
       date: DateTime.parse(map['date']),
       question: map['question'],
       response: map['response'],
+      journal: map['journal'],
     );
   }
 }
